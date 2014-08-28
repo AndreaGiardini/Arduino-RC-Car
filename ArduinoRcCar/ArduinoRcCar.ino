@@ -1,12 +1,13 @@
 #include <SPI.h>
 #include <WiFi.h>
-#include <WiFiUdp.h>
+//#include <WiFiUdp.h>
 
 char ssid[] = "natspot";     //  your network SSID (name)
 char pass[] = "123456789";  // your network password
 int status = WL_IDLE_STATUS;     // the Wifi radio's status
+IPAddress server(192,168,1,1);
 
-unsigned int localPort = 8080;
+//unsigned int localPort = 8080;
 
 //Motor pins
 int enableA = 53;
@@ -17,8 +18,10 @@ int enableB = 43;
 int pinB1 = 47;
 int pinB2 = 45;
 
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
-WiFiUDP Udp;
+//char packetBuffer[UDP_TX_PACKET_MAX_SIZE];
+//WiFiUDP Udp;
+WiFiClient client;
+char c;
 
 void setup() {
   Serial.begin(9600);
@@ -53,14 +56,39 @@ void setup() {
   Serial.print("IP Address: ");
   Serial.println(ip);
   
-  Udp.begin(localPort);
+  client.connect(server, 8080);
   
   enableMotors();
   
+  Serial.println("Entering the loop");
 }
 
 void loop() {
   
+  while(client.available()){
+    client.readBytes(&c, 1);
+    Serial.write(c);
+    
+    if (c == 'A') {
+      forward();
+      //Serial.println("Avanti");
+    } else if (c == 'I') {
+      backward();
+      //Serial.println("Indietro");
+    } else if (c == 'D') {
+      turnRight();
+      //Serial.println("Destra");
+    } else if (c == 'S') {
+      turnLeft();
+      //Serial.println("Sinistra");
+    } else {
+      brake();
+      //Serial.println("Stop");
+    }
+    
+  }
+  
+  /*
   int packetSize = Udp.parsePacket();
   if (packetSize)
   {
@@ -69,6 +97,7 @@ void loop() {
     if (len > 0) packetBuffer[len] = 0;
     Serial.println("Contents:");
     Serial.print(packetBuffer);
+  
     
     if (packetBuffer == "AVANTI") {
       forward();
@@ -82,9 +111,9 @@ void loop() {
     } else {
       brake();
     }
-        
+      
   }
-  
+  */
   
   
 
