@@ -1,6 +1,5 @@
 #include <SPI.h>
 #include <WiFi.h>
-//#include <WiFiUdp.h>
 
 char ssid[] = "natspot";     //  your network SSID (name)
 char pass[] = "123456789";  // your network password
@@ -69,19 +68,14 @@ void loop() {
 
     if (c == 'A') {
       forward();
-      //Serial.println("Avanti");
     } else if (c == 'I') {
       backward();
-      //Serial.println("Indietro");
     } else if (c == 'D') {
       turnRight();
-      //Serial.println("Destra");
     } else if (c == 'S') {
       turnLeft();
-      //Serial.println("Sinistra");
     } else {
       brake();
-      //Serial.println("Stop");
     }
 
   }
