@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <linux/joystick.h>
+#include <netinet/tcp.h>
 
 char arduIp[15] = "192.168.1.109";
 unsigned short int serverPort = 8080;
@@ -91,6 +92,9 @@ int main() {
     connfd = accept(listenfd,(struct sockaddr *)&cliaddr,&clilen);
 
     printf("GOT CONNECTION\n");
+    int one = 1;
+
+    setsockopt(connfd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));
     while (1) {
         while (read(fd, &jse, sizeof(jse)) > 0) {
             process_event(jse);
