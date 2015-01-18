@@ -13,6 +13,10 @@ unsigned short int serverPort = 8080;
 
 char msg;
 
+/*
+ * Open the joystick file descriptor
+ * return: JY file descriptor
+ */
 int open_joystick(char *device_name) {
     int fd = -1;
     if (device_name == NULL) {
@@ -28,6 +32,9 @@ int open_joystick(char *device_name) {
     return fd;
 }
 
+/*
+ * Print info about the joystick model
+ */
 void print_device_info(int fd) {
   int axes=0, buttons=0;
   char name[128];
@@ -39,6 +46,10 @@ void print_device_info(int fd) {
   printf("%s\n  %d Axes %d Buttons\n", name, axes, buttons);
 }
 
+/*
+ * When a button is pressed we associate it with
+ * a message (msg) otherwise we skip the event
+ */
 void process_event(struct js_event jse) {
     if (jse.type == 2) {
         if (jse.number == 0) {
@@ -71,15 +82,18 @@ int main() {
     int fd, i=0;
     struct js_event jse;
 
+    //Open joystick and print info
     fd = open_joystick("/dev/input/js1");
     print_device_info(fd);
 
+    //Open a TCP socket
     int listenfd,connfd;
     struct sockaddr_in servaddr,cliaddr;
     socklen_t clilen;
 
     listenfd=socket(AF_INET,SOCK_STREAM,0);
 
+    //Server settings
     bzero(&servaddr,sizeof(servaddr));
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr=htonl(INADDR_ANY);
@@ -87,14 +101,17 @@ int main() {
     bind(listenfd,(struct sockaddr *)&servaddr,sizeof(servaddr));
 
     listen(listenfd, 1024);
-
+    
+    //Ready to handle connections
     clilen=sizeof(cliaddr);
     connfd = accept(listenfd,(struct sockaddr *)&cliaddr,&clilen);
 
     printf("GOT CONNECTION\n");
     int one = 1;
 
+    //The TCP_NODELAY flag speeds up the communication
     setsockopt(connfd, SOL_TCP, TCP_NODELAY, &one, sizeof(one));
+    //Ready to handle events
     while (1) {
         while (read(fd, &jse, sizeof(jse)) > 0) {
             process_event(jse);
